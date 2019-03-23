@@ -12,6 +12,7 @@
         "google/apiclient": "^2.2",
         "knpuniversity/oauth2-client-bundle": "^1.27",
         "league/oauth2-google": "^3.0",
+        "symfony/apache-pack": "^1.0",
         "symfony/console": "4.2.*",
         "symfony/dotenv": "4.2.*",
         "symfony/flex": "^1.1",
@@ -20,6 +21,7 @@
         "symfony/profiler-pack": "^1.0",
         "symfony/security-bundle": "4.2.*",
         "symfony/test-pack": "^1.0",
+        "symfony/web-server-bundle": "4.2.*",
         "symfony/yaml": "4.2.*"
     },
     "config": {
@@ -68,6 +70,5 @@
         }
     },
     "require-dev": {
-        "symfony/web-server-bundle": "4.2.*"
     }
 }
