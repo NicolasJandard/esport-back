@@ -2,6 +2,6 @@ language: php
 php:
   - '7.2'
 install:
-  - composer install --dev
+  - composer install
 script:
   - ./vendor/bin/phpunit
