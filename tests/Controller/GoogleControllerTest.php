@@ -3,7 +3,7 @@
 namespace App\Tests\Controller;
 
 use App\Controller\GoogleController;
-use App\Entity\User;
+use App\Entity\UserGoogle;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\Common\Persistence\ObjectRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -18,7 +18,7 @@ class GoogleControllerTest extends TestCase {
     $entityManager = $this->createMock(EntityManagerInterface::class);
     $serializer = $this->createMock(SerializerInterface::class);
     $gController = new GoogleController(new \Google_Client(), $entityManager, $serializer);
-    $user = new User();
+    $user = new UserGoogle();
     $user->setEmail('email')
          ->setFirstName('given_name')
          ->setLastName('family_name')

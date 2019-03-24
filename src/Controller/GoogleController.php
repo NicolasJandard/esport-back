@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\User;
+use App\Entity\UserGoogle;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -51,7 +51,7 @@ class GoogleController extends AbstractController
 
             if($payload !== false) {
                 $email = $payload['email'];
-                $user = $this->em->getRepository(User::class)->findOneBy(['email' => $email]);
+                $user = $this->em->getRepository(UserGoogle::class)->findOneBy(['email' => $email]);
 
                 if(!$user) {
                     $user = $this->register($payload);
@@ -76,7 +76,7 @@ class GoogleController extends AbstractController
             return false;
         }
 
-        $user = new User();
+        $user = new UserGoogle();
         $today = new \DateTime(date('Y-m-d H:i:s'));
         $user
             ->setEmail($payload['email'])
