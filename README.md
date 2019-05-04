@@ -2,7 +2,7 @@
 
 <strong>Backend Symfony</strong>
 
-<strong>Lundi 25 mars</strong>
+<strong>Lundi 25 mars</strong> <span>(https://youtu.be/tNP6FnsbLHo)</span>
 <ul>
   <li>Création des images Docker</li>
   <li>Authentification via Google Auth</li>
@@ -10,7 +10,7 @@
   <li>Mise en place de Travis CI</li>
   <li>Mise en place des tests <strong>(tout au long du développement)</strong></li>
 </ul>
-<strong>Mardi 23 avril</strong>
+<strong>Mardi 23 avril</strong> <span>(https://youtu.be/msh7rshe3e0)</span>
 <ul>
   <li>Mise en place de l'API</li>
   <li>Faire une description détaillée d'un pokémon</li>
