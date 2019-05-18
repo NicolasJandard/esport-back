@@ -21,7 +21,9 @@ final class Version20190518114138 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'postgresql', 'Migration can only be executed safely on \'postgresql\'.');
-
+        
+        $this->addSql('DROP SCHEMA public CASCADE');
+        $this->addSql('CREATE SCHEMA public');
         $this->addSql('CREATE SEQUENCE event_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE user_google_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE pokemon_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
@@ -37,15 +39,8 @@ final class Version20190518114138 extends AbstractMigration
         // this down() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'postgresql', 'Migration can only be executed safely on \'postgresql\'.');
 
+        $this->addSql('DROP SCHEMA public CASCADE');
         $this->addSql('CREATE SCHEMA public');
-        $this->addSql('DROP SEQUENCE event_id_seq CASCADE');
-        $this->addSql('DROP SEQUENCE user_google_id_seq CASCADE');
-        $this->addSql('DROP SEQUENCE pokemon_id_seq CASCADE');
-        $this->addSql('DROP SEQUENCE team_id_seq CASCADE');
-        $this->addSql('DROP TABLE event');
-        $this->addSql('DROP TABLE user_google');
-        $this->addSql('DROP TABLE pokemon');
-        $this->addSql('DROP TABLE team');
         $this->addSql('CREATE SEQUENCE event_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE user_google_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE pokemon_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
