@@ -3,3 +3,5 @@ easy_admin:
         # List the entity class name you want to manage
         - App\Entity\Event
         - App\Entity\UserGoogle
+        - App\Entity\Team
+        - App\Entity\Pokemon
