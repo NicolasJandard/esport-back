@@ -18,7 +18,7 @@
   <li>Pouvoir avoir une description détaillée des compétences disponibles</li>
   <li>Rechercher une compétence selon des critères</li>
 </ul>
-<strong>Jeudi 23 Mai</strong>
+<strong>Jeudi 23 Mai</strong> <span>(https://youtu.be/eFYQahaj7Io)</span>
 <ul>
   <li>Créer sa propre équipe pokémon</li>
   <li>Pouvoir décrire l'équipe pokémon (commentaires de l'auteur, stratégie, etc...)</li>
