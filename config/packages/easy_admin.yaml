@@ -1,7 +1,7 @@
 easy_admin:
     entities:
         # List the entity class name you want to manage
-        - App\Entity\Event
         - App\Entity\UserGoogle
         - App\Entity\Team
         - App\Entity\Pokemon
+        - App\Entity\Comment

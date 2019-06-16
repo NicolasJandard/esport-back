@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\UserGoogle;
 use App\Entity\Pokemon;
 use App\Entity\Team;
+use App\Entity\Comment;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -69,23 +70,78 @@ class TeamController extends AbstractController
      */
     public function getTopteams() {
         $teamsObject = $this->em->getRepository(Team::class)
-            ->findBy(array(), array('id' => 'DESC'), 5);
+            ->findBy(array(), array('id' => 'DESC'), 4);
         $teamsToShow = array();
         for($i = 0; $i < count($teamsObject); $i++) {
-            $team = $teamsObject[$i];
-            $teamsToShow[$i]["pokemonOne"] = $this->em->getRepository(Pokemon::class)->findOneBy(['id' =>$team->getPokemonOne()]);
-            $teamsToShow[$i]["pokemonTwo"] = $this->em->getRepository(Pokemon::class)->findOneBy(['id' =>$team->getPokemonTwo()]);
-            $teamsToShow[$i]["pokemonThree"] = $this->em->getRepository(Pokemon::class)->findOneBy(['id' =>$team->getPokemonThree()]);
-            $teamsToShow[$i]["pokemonFour"] = $this->em->getRepository(Pokemon::class)->findOneBy(['id' =>$team->getPokemonFour()]);
-            $teamsToShow[$i]["pokemonFive"] = $this->em->getRepository(Pokemon::class)->findOneBy(['id' =>$team->getPokemonFive()]);
-            $teamsToShow[$i]["pokemonSix"] = $this->em->getRepository(Pokemon::class)->findOneBy(['id' =>$team->getPokemonSix()]);            
-            $creator = $this->em->getRepository(UserGoogle::class)->findOneBy(['id' =>$team->getCreator()]);
-            $teamsToShow[$i]["creator"] = $creator->getFirstName()." ".$creator->getLastName();
-            $teamsToShow[$i]["creatorImage"] = $creator->getAvatar();
-            $teamsToShow[$i]["comment"] = $team->getComment();
+            $teamsToShow[$i] = $this->composeTeamJson($teamsObject[$i]);
         }
         $teamsToShow = $this->serializer->serialize($teamsToShow, 'json');
         return new Response($teamsToShow, Response::HTTP_OK);
+    }
+
+    /**
+     * @Route("/team/details/{id}", name = "details_team", methods = { "GET" })
+     *
+     * @param Request $request
+     *
+     * @return Response
+     *
+     * @throws \Exception | \LogicException
+     */
+    public function getDetailsTeam($id) {
+        $teamObject = $this->em->getRepository(Team::class)->findOneBy(['id' => $id]);
+        $team = $this->composeTeamJson($teamObject);
+        return new Response($this->serializer->serialize($team, 'json'), Response::HTTP_OK);
+    }
+
+    /**
+     * @Route("/team/comment", name = "comment_team", methods = { "POST" })
+     *
+     * @param Request $request
+     *
+     * @return Response
+     *
+     * @throws \Exception | \LogicException
+     */
+    public function teamComment(Request $request) {
+        $data = json_decode($request->getContent(), true);
+
+        $user = $this->em->getRepository(UserGoogle::class)->findOneBy(['email' => $data['author']]);
+        if(!$user) {
+            return new Response("User unknown", Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        $today = new \DateTime(date('Y-m-d H:i:s'));
+        $comment = new Comment();
+
+        $comment->setText($data['text'])
+            ->setAuthor($user->getId())
+            ->setTeam($data['teamId'])
+            ->setRate($data['rate'])
+            ->setDate($today);
+
+        $this->em->persist($comment);
+        $this->em->flush();
+
+        return new Response("Successful", Response::HTTP_OK);
+    }
+
+    /**
+     * @Route("/team/comments/{teamId}", name = "comments_team", methods = { "GET" })
+     *
+     * @param Request $request
+     *
+     * @return Response
+     *
+     * @throws \Exception | \LogicException
+     */
+    public function getCommentsTeam($teamId) {
+        $commentsObject = $this->em->getRepository(Comment::class)->findBy(['team' => $teamId]);
+        $commentsToShow = array();
+        for($i = 0; $i < count($commentsObject); $i++) {
+            $commentsToShow[$i] = $this->composeCommentJson($commentsObject[$i]);
+        }
+        return new Response($this->serializer->serialize($commentsToShow, 'json'), Response::HTTP_OK);
     }
 
     private function getPokemonsId($pokemons) {
@@ -156,5 +212,33 @@ class TeamController extends AbstractController
         else {
             return false;
         }
+    }
+
+    private function composeTeamJson($team) {
+        $teamToShow["teamId"] = $team->getId();
+        $teamToShow["pokemonOne"] = $this->em->getRepository(Pokemon::class)->findOneBy(['id' =>$team->getPokemonOne()]);
+        $teamToShow["pokemonTwo"] = $this->em->getRepository(Pokemon::class)->findOneBy(['id' =>$team->getPokemonTwo()]);
+        $teamToShow["pokemonThree"] = $this->em->getRepository(Pokemon::class)->findOneBy(['id' =>$team->getPokemonThree()]);
+        $teamToShow["pokemonFour"] = $this->em->getRepository(Pokemon::class)->findOneBy(['id' =>$team->getPokemonFour()]);
+        $teamToShow["pokemonFive"] = $this->em->getRepository(Pokemon::class)->findOneBy(['id' =>$team->getPokemonFive()]);
+        $teamToShow["pokemonSix"] = $this->em->getRepository(Pokemon::class)->findOneBy(['id' =>$team->getPokemonSix()]);            
+        $creator = $this->em->getRepository(UserGoogle::class)->findOneBy(['id' =>$team->getCreator()]);
+        $teamToShow["creator"] = $creator->getFirstName()." ".$creator->getLastName();
+        $teamToShow["creatorImage"] = $creator->getAvatar();
+        $teamToShow["comment"] = $team->getComment();
+        $teamToShow["tier"] = $team->getTier();
+
+        return $teamToShow;
+    }
+
+    private function composeCommentJson($comment) {
+        $commentToShow["text"] = $comment->getText();
+        $commentToShow["rate"] = $comment->getRate();
+        $commentToShow["date"] = $comment->getDate();         
+        $author = $this->em->getRepository(UserGoogle::class)->findOneBy(['id' =>$comment->getAuthor()]);
+        $commentToShow["author"] = $author->getFirstName()." ".$author->getLastName();
+        $commentToShow["authorImage"] = $author->getAvatar();
+        $commentToShow["authorEmail"] = $author->getEmail();
+        return $commentToShow;
     }
 }
