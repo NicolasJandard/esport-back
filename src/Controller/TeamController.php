@@ -49,10 +49,10 @@ class TeamController extends AbstractController
         }
 
         $pokemonsId = $this->getPokemonsId($data['pokemons']);
-        $team = $this->registerTeam($pokemonsId, $data['comment'], $data['tier'], $user->getId());
+        $team = $this->registerTeam($pokemonsId, $data['comment'], $data['tier'], $user->getId(), $data['name']);
 
         if($team) {
-            return new Response("Team created", Response::HTTP_OK);
+            return new Response(Response::HTTP_OK);
         }
         else {
             return new Response("Team already exists for this user", Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -123,7 +123,7 @@ class TeamController extends AbstractController
         $this->em->persist($comment);
         $this->em->flush();
 
-        return new Response("Successful", Response::HTTP_OK);
+        return $this->getCommentsTeam($data['teamId']);
     }
 
     /**
@@ -142,6 +142,46 @@ class TeamController extends AbstractController
             $commentsToShow[$i] = $this->composeCommentJson($commentsObject[$i]);
         }
         return new Response($this->serializer->serialize($commentsToShow, 'json'), Response::HTTP_OK);
+    }
+
+    /**
+     * @Route("/team/user/{mail}", name = "user_teams", methods = { "GET" })
+     *
+     * @param Request $request
+     *
+     * @return Response
+     *
+     * @throws \Exception | \LogicException
+     */
+    public function getUserTeams($mail) {
+        $user = $this->em->getRepository(UserGoogle::class)->findOneBy(['email' => $mail]);
+        $teamsObject = $this->em->getRepository(Team::class)->findBy(['creator' => $user->getId()]);
+        $teamsToShow = array();
+        for($i = 0; $i < count($teamsObject); $i++) {
+            $teamsToShow[$i] = $this->composeTeamJson($teamsObject[$i]);
+        }
+        return new Response($this->serializer->serialize($teamsToShow, 'json'), Response::HTTP_OK);
+    }
+
+    /**
+     * @Route("/team/delete/{id}", name = "delete_team", methods = { "GET" })
+     *
+     * @param Request $request
+     *
+     * @throws \Exception | \LogicException
+     */
+    public function deleteTeam($id) {
+        $team = $this->em->getRepository(Team::class)->findOneById($id);
+        $comments = $this->em->getRepository(Comment::class)->findBy(['team' => $team->getId()]);
+        $user = $this->em->getRepository(UserGoogle::class)->findOneById($team->getCreator());
+
+        $this->em->remove($team);
+        for($i = 0; $i < count($comments); $i++) {
+            $this->em->remove($comments[$i]);
+        }
+        $this->em->flush();
+
+        return $this->getUserTeams($user->getEmail());
     }
 
     private function getPokemonsId($pokemons) {
@@ -180,7 +220,7 @@ class TeamController extends AbstractController
         return $pokemonsId;
     }
 
-    private function registerTeam($pokemonsId, $comment, $tier, $userId) {
+    private function registerTeam($pokemonsId, $comment, $tier, $userId, $name) {
         $exists = $this->em->getRepository(Team::class)->findOneBy([
             'pokemon_one' => $pokemonsId[0],
             'pokemon_two' => $pokemonsId[1],
@@ -197,6 +237,7 @@ class TeamController extends AbstractController
             $team->setCreator($userId)
                 ->setComment($comment)
                 ->setTier($tier)
+                ->setName($name)
                 ->setPokemonOne($pokemonsId[0])
                 ->setPokemonTwo($pokemonsId[1])
                 ->setPokemonThree($pokemonsId[2])
@@ -216,6 +257,7 @@ class TeamController extends AbstractController
 
     private function composeTeamJson($team) {
         $teamToShow["teamId"] = $team->getId();
+        $teamToShow["name"] = $team->getName();
         $teamToShow["pokemonOne"] = $this->em->getRepository(Pokemon::class)->findOneBy(['id' =>$team->getPokemonOne()]);
         $teamToShow["pokemonTwo"] = $this->em->getRepository(Pokemon::class)->findOneBy(['id' =>$team->getPokemonTwo()]);
         $teamToShow["pokemonThree"] = $this->em->getRepository(Pokemon::class)->findOneBy(['id' =>$team->getPokemonThree()]);
